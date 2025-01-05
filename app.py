@@ -192,12 +192,20 @@ def get_user(db, email: str):
     user = db.query(Business).filter(Business.email == email).first()
     if user:
         return UserInDB(**to_dict(user))
-    return None
+    raise HTTPException(
+            status_code=401,
+            detail="Account not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 def authenticate_user(db, email: str, password: str):
     user = get_user(db, email)
     if not user or not verify_password(password, user.password_hash):
-        return None
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -260,7 +268,8 @@ def create_user(body: CreateBusiness, db: Session = Depends(get_db)):
     db.refresh(wallet)
     return {
         "user_id": user.user_id,
-        "api_key": api_key
+        "api_key": api_key,
+        "access_token": create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     }
 
 @app.post("/login", response_model=Token, tags=["Auth"])
@@ -269,8 +278,8 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     user = authenticate_user(db, usr.email, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            status_code=401,
+            detail="Email or Password incorrect",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token = create_access_token(data={"sub": user.email}, 
