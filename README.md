@@ -1,4 +1,4 @@
-# LianFlow the Crypto Payment Gateway on the Neo X Chain
+# LianFlow Crypto Payment Gateway
 
 LianFlow is designed to simplify crypto payment processing for businesses operating on the NEO X blockchain. The solution empowers businesses to accept cryptocurrency payments for their products and services while offering an easy-to-integrate system for existing codebases and platforms. By streamlining the integration process, the platform reduces the technical barriers that often deter businesses from adopting blockchain-based payments..
 
